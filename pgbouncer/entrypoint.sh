@@ -36,8 +36,9 @@ create_databases_config(){
 ${DATABASES_CLIENT_SIDE_DBNAME:-*} = host = $DATABASES_HOST \
 port = ${DATABASES_PORT:-5432} \
 dbname = ${DATABASES_DBNAME:-$POSTGRES_DB} \
+auth_user = pgbouncer \
 client_encoding = ${DATABASES_CLIENT_ENCODING:-$DATABASES_CLIENT_ENCODING} \
-timezone = ${DATABASES_TIMEZONE:-$DATABASES_TIMEZONE}${nl}
+timezone = ${DATABASES_TIMEZONE:-$DATABASES_TIMEZONE}${nl} 
 EOF
   fi
 }
@@ -57,11 +58,6 @@ $(create_databases_config)
 
 [users]
 pgbouncer=pool_mode=${DATABASES_POOL_MODE:-$PGBOUNCER_POOL_MODE} ${DATABASES_MAX_CONN:-max_user_connections=25}
-dba=pool_mode=${DATABASES_POOL_MODE:-$PGBOUNCER_POOL_MODE} ${DATABASES_MAX_CONN:-max_user_connections=6}${nl}\
-dbdev=pool_mode=${DATABASES_POOL_MODE:-$PGBOUNCER_POOL_MODE} ${DATABASES_MAX_CONN:-max_user_connections=10}${nl}\
-dwdev=pool_mode=${DATABASES_POOL_MODE:-$PGBOUNCER_POOL_MODE} ${DATABASES_MAX_CONN:-max_user_connections=10}${nl}\
-postgres=pool_mode=${DATABASES_POOL_MODE:-$PGBOUNCER_POOL_MODE} ${DATABASES_MAX_CONN:-max_user_connections=10}${nl}\
-airflow=pool_mode=${DATABASES_POOL_MODE:-$AIRFLOW_POOL_MODE} ${DATABASES_MAX_CONN:-max_user_connections=30}${nl}
 
 [pgbouncer]
 default_pool_size = ${DATABASES_POOL_SIZE:-$PGBOUNCER_DEFAULT_POOL_SIZE}${nl}\
@@ -75,7 +71,7 @@ unix_socket_mode = ${PGBOUNCER_UNIX_SOCKET_MODE:-$PGBOUNCER_UNIX_SOCKET_MODE}${n
 unix_socket_group = ${PGBOUNCER_UNIX_SOCKET_GROUP:-$PGBOUNCER_UNIX_SOCKET_GROUP}${nl}\
 auth_file = ${PGBOUNCER_AUTH_FILE:-$PGBOUNCER_AUTH_FILE}${nl}\
 auth_type = ${PGBOUNCER_AUTH_TYPE:-md5}${nl}\
-user = pgbouncer${nl}\
+user = postgres ${nl}\
 auth_query = ${PGBOUNCER_AUTH_QUERY:-$PGBOUNCER_AUTH_QUERY}${nl}\
 pool_mode = ${PGBOUNCER_POOL_MODE:-$PGBOUNCER_POOL_MODE}${nl}\
 max_client_conn = ${PGBOUNCER_MAX_CLIENT_CONN:-$PGBOUNCER_MAX_CLIENT_CONN}${nl}\
@@ -111,12 +107,8 @@ create_config_users(){
     nl="${nl%_}"
 
     cat > ${PG_CONFIG_DIR}/userlist.txt << EOF
-"${pgbouncer:-$pgbouncer}" "${pgbouncerpass:-$pgbouncerpass}"${nl}\
-"${dba:-$dba}" "${dbapass:-$dbapass}"${nl}\
-"${dbdev:-$dbdev}" "${dbdevpass:-$dbdevpass}"${nl}\
-"${dwdev:-$dwdev}" "${dwdevpass:-$dwdevpass}"${nl}\
-"${postgres:-$postgres}" "${postgrespass:-$postgrespass}"${nl}\
-"${airflow:-$airflow}" "${airflowpass:-$airflowpass}"${nl}
+"${pgbouncer:-$pgbouncer}" "${pgbouncerpass:-$pgbouncerpasss}"${nl}\
+
 EOF
 
     if [ -z "$QUIET" ]; then
