@@ -586,3 +586,26 @@
 2022-11-07 18:01:42.773 UTC [1] LOG C-0x55cff3fda260: prod_db/dbdev@192.168.112.1:56778 closing because: client close request (age=3s)
 2022-11-07 18:01:42.830 UTC [1] LOG C-0x55cff3fda030: prod_db/dbdev@192.168.112.1:56786 closing because: client close request (age=2s)
 2022-11-07 18:01:50.505 UTC [1] LOG got SIGTERM, fast exit
+2022-11-07 18:15:18.220 UTC [1] LOG kernel file descriptor limit: 1048576 (hard: 1048576); max_client_conn: 50, max expected fd use: 62
+2022-11-07 18:15:18.259 UTC [1] LOG listening on 0.0.0.0:6432
+2022-11-07 18:15:18.262 UTC [1] LOG listening on [::]:6432
+2022-11-07 18:15:18.264 UTC [1] LOG listening on unix:/var/run/postgresql/.s.PGSQL.6432
+2022-11-07 18:15:18.269 UTC [1] LOG process up: PgBouncer 1.17.0, libevent 2.1.8-stable (epoll), adns: c-ares 1.15.0, tls: LibreSSL 2.7.5
+2022-11-07 18:15:35.230 UTC [1] LOG got SIGTERM, fast exit
+2022-11-07 18:15:57.240 UTC [1] LOG kernel file descriptor limit: 1048576 (hard: 1048576); max_client_conn: 50, max expected fd use: 62
+2022-11-07 18:15:57.278 UTC [1] LOG listening on 0.0.0.0:6432
+2022-11-07 18:15:57.290 UTC [1] LOG listening on [::]:6432
+2022-11-07 18:15:57.512 UTC [1] LOG listening on unix:/var/run/postgresql/.s.PGSQL.6432
+2022-11-07 18:15:57.521 UTC [1] LOG process up: PgBouncer 1.17.0, libevent 2.1.8-stable (epoll), adns: c-ares 1.15.0, tls: LibreSSL 2.7.5
+2022-11-07 18:16:09.935 UTC [1] LOG C-0x5601dbbeb030: (nodb)/(nouser)@192.168.176.1:58752 registered new auto-database: db=prod_db
+2022-11-07 18:16:09.944 UTC [1] LOG S-0x5601dbc4e590: prod_db/pgbouncer@192.168.176.2:5432 new connection to server (from 192.168.176.4:45866)
+2022-11-07 18:16:10.058 UTC [1] LOG C-0x5601dbbeb030: prod_db/dbdev@192.168.176.1:58752 login attempt: db=prod_db user=dbdev tls=no
+2022-11-07 18:16:10.073 UTC [1] LOG S-0x5601dbc4e7c0: prod_db/dbdev@192.168.176.2:5432 new connection to server (from 192.168.176.4:45872)
+2022-11-07 18:16:10.257 UTC [1] LOG C-0x5601dbbeb260: prod_db/dbdev@192.168.176.1:58754 login attempt: db=prod_db user=dbdev tls=no
+2022-11-07 18:16:10.261 UTC [1] LOG S-0x5601dbc4e9f0: prod_db/dbdev@192.168.176.2:5432 new connection to server (from 192.168.176.4:45882)
+2022-11-07 18:16:10.595 UTC [1] LOG S-0x5601dbc4ec20: prod_db/dbdev@192.168.176.2:5432 new connection to server (from 192.168.176.4:47778)
+2022-11-07 18:16:10.657 UTC [1] LOG C-0x5601dbbeb490: prod_db/dbdev@192.168.176.1:61180 login attempt: db=prod_db user=dbdev tls=no
+2022-11-07 18:16:11.032 UTC [1] LOG S-0x5601dbc4ee50: prod_db/dbdev@192.168.176.2:5432 new connection to server (from 192.168.176.4:47788)
+2022-11-07 18:16:11.259 UTC [1] LOG S-0x5601dbc4f080: prod_db/dbdev@192.168.176.2:5432 new connection to server (from 192.168.176.4:47800)
+2022-11-07 18:16:37.239 UTC [1] LOG stats: 0 xacts/s, 0 queries/s, in 193 B/s, out 1659 B/s, xact 8421 us, query 8421 us, wait 3836 us
+2022-11-07 18:16:51.297 UTC [1] LOG got SIGTERM, fast exit
