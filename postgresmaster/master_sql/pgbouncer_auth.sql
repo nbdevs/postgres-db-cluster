@@ -11,5 +11,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-REVOKE ALL ON FUNCTION pgbouncer.user_auth(p_username TEXT) FROM dwdev, dbdev, airflow; -- remove access to pgbouncer function for all users
-GRANT EXECUTE ON FUNCTION pgbouncer.user_auth(p_usename TEXT) TO dba, postgres, pgbouncer;
+REVOKE ALL ON FUNCTION pgbouncer.user_auth(p_username TEXT) FROM dwdev, dbdev, dba, airflow, postgres; -- remove access to pgbouncer function for all users
+GRANT EXECUTE ON FUNCTION pgbouncer.user_auth(p_username TEXT) TO pgbouncer;
