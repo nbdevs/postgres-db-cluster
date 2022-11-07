@@ -1,0 +1,98 @@
+version: '3.9'
+services:
+
+  readreplica:
+    build: postgresreplica
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      PG_REP_USER: ${PG_REP_USER}
+      PG_REP_PASSWORD: ${PG_REP_PASSWORD}
+      PG_MAS_HOST: ${PG_MAS_HOST}
+    ports:
+      - ${PG_S_PORT}:${PG_MAS_PORT}
+    depends_on:
+      postgresmaster:
+        condition: service_healthy
+    restart: always
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '5'
+        labels: 'replica'
+    networks:
+      default:
+        aliases:
+          - pgreplica
+          - pgbouncer
+ 
+  postgresmaster:
+    build: postgresmaster
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PG_REP_USER: ${PG_REP_USER}
+      PG_REP_PASSWORD: ${PG_REP_PASSWORD}
+    ports:
+      - ${PG_MAS_PORT}:${PG_MAS_PORT}
+    restart: always
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '5'
+        labels: 'production'
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - pg_logs:/var/log/postgresql
+    command: postgres -c config_file='/etc/postgresql/postgresql.conf' -c hba_file='/etc/postgresql/pg_hba.conf'
+    networks:
+      default:
+        aliases:
+         - pgreplica
+         - pgbouncer
+    healthcheck: 
+      test: pg_isready -d $POSTGRES_DB -U $POSTGRES_USER
+      interval: 15s
+      timeout: 15s
+      retries: 3
+      start_period: 10s
+
+  pgbouncer:
+    build: pgbouncer
+    env_file:
+      - .env
+    ports:
+      - ${PG_BOUNCER_PORT}:${PGBOUNCER_LISTEN_PORT}
+    restart: always
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '5'
+        labels: 'pgbouncer'
+    depends_on:
+      postgresmaster:
+        condition: service_healthy
+    volumes:
+     - ./pgbouncer/pgbouncer.log:/var/log/pgbouncer.log:rw
+    networks:
+      default:
+        aliases:
+         - pgreplica
+         - pgbouncer
+
+volumes:
+  pg_data:
+  pg_logs:
+
+     
+
+
+
+  
+
+      
