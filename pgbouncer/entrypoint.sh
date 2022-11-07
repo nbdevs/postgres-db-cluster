@@ -107,8 +107,7 @@ create_config_users(){
     nl="${nl%_}"
 
     cat > ${PG_CONFIG_DIR}/userlist.txt << EOF
-"${pgbouncer:-$pgbouncer}" "${pgbouncerpass:-$pgbouncerpass}"${nl}\
-
+"${pgbouncer:-$pgbouncer}" "${pgbouncerpass:-$pgbouncerpass}"${nl}
 EOF
 
     if [ -z "$QUIET" ]; then
