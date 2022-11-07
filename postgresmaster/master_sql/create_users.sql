@@ -19,7 +19,7 @@ BEGIN
             CASE x  
                 WHEN 1 THEN 
                     -- creating variable for password 
-                    SELECT $1 INTO pass;
+                    SELECT pass1 INTO pass;
                     --create dw developer and alter access privileges, providing passwords for users 
                     EXECUTE FORMAT('CREATE ROLE dbdev WITH NOSUPERUSER NOCREATEDB LOGIN CONNECTION LIMIT 30 ENCRYPTED PASSWORD %L', pass);
 
@@ -38,7 +38,7 @@ BEGIN
                     ALTER ROLE dbdev SET search_path = preprocess; -- set location for queries
                 WHEN 2 THEN
                     -- creating variable for password 
-                    SELECT $2 INTO pass;
+                    SELECT pass2 INTO pass;
                     --create dw developer and alter access privileges, providing passwords for user 
                     EXECUTE FORMAT('CREATE ROLE dwdev WITH REPLICATION LOGIN CONNECTION LIMIT 30 NOCREATEDB NOSUPERUSER ENCRYPTED PASSWORD %L', pass);
 
@@ -55,7 +55,7 @@ BEGIN
                     CREATE ROLE postgres SUPERUSER CREATEDB CREATEROLE INHERIT LOGIN NOREPLICATION BYPASSRLS;
                 WHEN 4 THEN
                     -- creating variable for password 
-                    SELECT $3 INTO pass;
+                    SELECT pass3 INTO pass;
                     --create pgbouncer and alter access privileges, providing passwords for user
                     EXECUTE FORMAT('CREATE ROLE pgbouncer NOSUPERUSER NOCREATEROLE LOGIN NOREPLICATION ENCRYPTED PASSWORD %L', pass);
 
@@ -65,7 +65,8 @@ BEGIN
                     REVOKE ALL PRIVILEGES ON SCHEMA fps FROM pgbouncer;
                 WHEN 5 THEN
                     -- creating variable for password 
-                    SELECT $4 INTO pass;
+                    SELECT pass4 INTO pass;
+                    RAISE NOTICE 'VALUE: %', pass;
                     --create airflow and alter access privileges providing passwords for user
                     EXECUTE FORMAT('CREATE ROLE airflow NOSUPERUSER NOCREATEROLE LOGIN NOREPLICATION ENCRYPTED PASSWORD %L', pass);
 
