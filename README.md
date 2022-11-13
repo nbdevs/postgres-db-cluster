@@ -4,6 +4,18 @@ This repository contains all of the database code (postgresql) and configuration
 
 ## Getting Started
 
+## Installation
+
+Software dependencies:
+su-exec
+postgresql
+docker-compose
+docker
+
+Docker Desktop for Mac is recommended for install in order to have access to the dockerd and in order to be able to use docker-compose.
+
+You can then clone and pull the repo and install the local environment through:
+
 ## Project status
 
 Ongoing - minor structural changes expected due to a few pending feature additions.
@@ -13,6 +25,3 @@ Ongoing - minor structural changes expected due to a few pending feature additio
 Copyright © 2022 Nicholas Bojor.
 
 The code in this repository is licensed under the MIT license.
-
-
-
