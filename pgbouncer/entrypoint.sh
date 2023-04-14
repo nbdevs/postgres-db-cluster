@@ -81,7 +81,8 @@ min_pool_size = ${PGBOUNCER_MIN_POOL_SIZE:-$PGBOUNCER_MIN_POOL_SIZE}${nl}\
 max_db_connections = ${PGBOUNCER_MAX_DB_CONNECTIONS:-$PGBOUNCER_MAX_DB_CONNECTIONS}${nl}\
 max_user_connections = ${PGBOUNCER_MAX_USER_CONNECTIONS:-$PGBOUNCER_MAX_USER_CONNECTIONS}${nl}\
 application_name_add_host = ${PGBOUNCER_APPLICATION_NAME_ADD_HOST:-$PGBOUNCER_APPLICATION_NAME_ADD_HOST}${nl}\
-server_reset_query = ${SERVER_RESET:-$SERVER_RESET}${nl}
+server_reset_query = ${SERVER_RESET:-$SERVER_RESET}${nl}\
+query_wait_timeout = ${QUERY_WAIT_TIMEOUT:-$PGBOUNCER_QUERY_WAIT_TIMEOUT}${nl}
 
 # Log settings
 syslog = ${PGBOUNCER_SYSLOG:-$PGBOUNCER_SYSLOG}${nl}\
