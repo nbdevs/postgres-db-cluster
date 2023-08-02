@@ -58,7 +58,23 @@ Docker Desktop for Mac is recommended for install in order to have access to the
 - docker-compose
 - docker
 
-You can then clone and pull the repo and install the local environment through:
+You can then clone and pull the repo and install the environment following these steps:
+
+1. Open terminal app in desktop
+2. Change the current working directory to the location which you want to directory to be cloned to.
+3. Use the git clone command, and the URL type you require (This example uses HTTPS).   
+    ```Bash
+    git clone https://github.com/nbdevs/postgres-db-cluster.git
+    ```
+4. Once you click enter you should see the following to confirm success.
+    ```Bash
+    $ git clone https://github.com/nbdevs/postgres-db-cluster.git
+    > Cloning into `Project-Folder`...
+    > remote: Counting objects: 10, done.
+    > remote: Compressing objects: 100% (8/8), done.
+    > remove: Total 10 (delta 1), reused 10 (delta 1)
+    > Unpacking objects: 100% (10/10), done.
+    ```
 
 
 ## Project status
