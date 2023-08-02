@@ -28,8 +28,8 @@ In addition to this, the process for identifying the relations between entities 
 As displayed within the metadata descriptions, the primary and foreign keys of each entity were also identified at this point, and the resulting full description of the final entity relationships and multiplicities can be seen below in a few different examples:
 
 <div>
-  <img src="https://github.com/nbdevs/dag-development/assets/75015699/8b6fe89e-dafc-4bf3-841a-fe52e8420fb4" title="Driver Championship VIEW" alt="Driver Championship" width="180" height="150"/>&nbsp;
-  <img src="https://github.com/nbdevs/dag-development/assets/75015699/7403689f-6cae-4aa1-a3e0-837197e91a23" title="Grid Metadata" alt="Grid" width="190" height="150"/>&nbsp;
+  <img src="https://github.com/nbdevs/dag-development/assets/75015699/8b6fe89e-dafc-4bf3-841a-fe52e8420fb4" title="Driver Championship VIEW" alt="Driver Championship" width="180" height="290"/>&nbsp;
+  <img src="https://github.com/nbdevs/dag-development/assets/75015699/7403689f-6cae-4aa1-a3e0-837197e91a23" title="Grid Metadata" alt="Grid" width="193" height="290"/>&nbsp;
 </div>
 
 ## Requirements related to Database System
