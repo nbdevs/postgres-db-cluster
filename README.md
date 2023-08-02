@@ -47,9 +47,7 @@ As displayed within the metadata descriptions, the primary and foreign keys of e
 |DBMS Backup, Replicability and Failover|The system may run a standby node for the database to ensure high availability of the DBMS in case of system failures or crashes.|To prevent loss of data and metadata.| 
 |Choice of Database - Metadata|The system shall use PostgreSQL as the backend database used to store the metadata of the system.|Relational database which has plenty of open-source support and is necessary to model entity-relationships in the metadata model in preparation for the data warehouse. Here the metadata model, job templates for python DAG creation and synchronisation as well as PostgreSQL jobs via templates will be stored.|
 
-## Installation
-
-Software dependencies:
+## Software Dependencies/Installation
 
 Docker Desktop for Mac is recommended for install in order to have access to the dockerd and in order to be able to use docker-compose.
 
