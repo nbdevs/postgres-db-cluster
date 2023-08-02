@@ -30,6 +30,8 @@ As displayed within the metadata descriptions, the primary and foreign keys of e
 <div>
   <img src="https://github.com/nbdevs/dag-development/assets/75015699/8b6fe89e-dafc-4bf3-841a-fe52e8420fb4" title="Driver Championship VIEW" alt="Driver Championship" width="180" height="290"/>&nbsp;
   <img src="https://github.com/nbdevs/dag-development/assets/75015699/7403689f-6cae-4aa1-a3e0-837197e91a23" title="Grid Metadata" alt="Grid" width="193" height="290"/>&nbsp;
+  <img src="https://github.com/nbdevs/dag-development/assets/75015699/d62d8fcb-06d3-4cde-94b1-3c291f9ff241" title="Pit Metadata" alt="Pit" width="193" height="290"/>&nbsp;
+  <img src="https://github.com/nbdevs/dag-development/assets/75015699/7857f81e-ef45-410d-8253-8f35744bab77" title="Driver Championship Metadata" alt="Driver Champ Stand" width="193" height="290"/>&nbsp;
 </div>
 
 ## Requirements related to Database System
