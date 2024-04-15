@@ -31,7 +31,6 @@ BEGIN
                     GRANT USAGE ON SCHEMA preprocess TO limitedmodaccess;
                     GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA fps TO limitedmodaccess;
                     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA preprocess TO limitedmodaccess;
-                    GRANT exec ON xp_cmdshell TO dbdev;
                     GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA fps TO dbdev;
                     GRANT USAGE ON SCHEMA preprocess TO dbdev;
                     ALTER ROLE dbdev SET search_path = preprocess; -- set the location for the init db command to be sent to
