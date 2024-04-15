@@ -486,3 +486,7 @@ CREATE INDEX IF NOT EXISTS fk_pdriver_idx ON fps.pit USING btree (driver_id);
 -- race telemetry table 
 CREATE INDEX IF NOT EXISTS fk_rtrace_idx ON fps.race_telemetry USING btree (race_id, driver_id, season_year);
 
+
+
+
+
