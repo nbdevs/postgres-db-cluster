@@ -78,8 +78,8 @@ BEGIN
 END
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-REVOKE ALL ON FUNCTION preprocess.etl_setup() FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to pgbouncer function for all users
+REVOKE ALL ON FUNCTION preprocess.etl_setup() FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to etl_setup function for all users
 GRANT EXECUTE ON FUNCTION preprocess.etl_setup() TO dbdev;
 
-REVOKE ALL ON FUNCTION preprocess.copy_expert() FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to pgbouncer function for all users
+REVOKE ALL ON FUNCTION preprocess.copy_expert() FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to copy_expert function for all users
 GRANT EXECUTE ON FUNCTION preprocess.copy_expert() TO dbdev;
