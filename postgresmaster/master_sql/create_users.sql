@@ -1,6 +1,6 @@
 -- create users
 CREATE OR REPLACE PROCEDURE fps.user_init(pass1 TEXT, pass2 TEXT, pass3 TEXT, pass4 TEXT)
-LANGUAGE plpgsql
+LANGUAGE PLPGSQL
 AS $$
 DECLARE 
     m TEXT;
@@ -28,6 +28,7 @@ BEGIN
                     REVOKE ALL PRIVILEGES ON SCHEMA fps FROM dbdev;
                     GRANT USAGE ON SCHEMA fps TO limitedmodaccess;
                     GRANT USAGE ON SCHEMA preprocess TO limitedmodaccess;
+                    GRANT CREATE ON SCHEMA preprocess TO limitedmodaccess;
                     GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA fps TO limitedmodaccess;
                     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA preprocess TO limitedmodaccess;
                     GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA fps TO dbdev;
