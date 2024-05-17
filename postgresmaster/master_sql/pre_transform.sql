@@ -1,10 +1,11 @@
-CREATE OR REPLACE FUNCTION preprocess.copy_expert(
+CREATE OR REPLACE PROCEDURE preprocess.copy_expert(
     table_name TEXT,
-    csv_path TEXT,
-    column_count INTEGER
+    csv_path VARCHAR(200),
+    column_count INTEGER,
+    table_name_less_date TEXT
 )
-RETURNS VOID AS
-$$
+LANGUAGE PLPGSQL
+AS $$
 DECLARE
 col TEXT;
 col_first TEXT;
@@ -12,83 +13,112 @@ iter INTEGER;
 BEGIN
     RAISE NOTICE 'CREATING LANDING TABLE';
     --stage 1 
-    EXECUTE FORMAT("CREATE TABLE %I ();", table_name); -- creating landing table
+    EXECUTE FORMAT('CREATE TABLE IF NOT EXISTS preprocess.%I();', table_name); -- creating landing table
     FOR iter IN 1..column_count
     LOOP -- loop through and populate table based on 
-        EXECUTE FORMAT("ALTER TABLE %I ADD COLUMN col_%s TEXT;", table_name, iter);
+        EXECUTE FORMAT('ALTER TABLE preprocess.%I ADD COLUMN col_%s TEXT;', table_name, iter);
     END LOOP;
+
     RAISE NOTICE 'ADDED COLUMNS TO LANDING TABLE';
     -- stage 2
-    EXECUTE FORMAT("COPY %I FROM %L WITH (FORMAT CSV, DELIMITER ',', HEADER);", table_name, csv_path);
+    EXECUTE FORMAT('COPY preprocess.%I FROM ''%s'' WITH (FORMAT CSV, DELIMITER '','', HEADER);', table_name, csv_path);
+   EXECUTE FORMAT("SELECT col_1 FROM %I LIMIT 1 INTO col_first", table_name);
 
-    FOR col IN EXECUTE FORMAT('SELECT UNNEST(string_to_array(TRIM(%s::text, ''()''), '','')) FROM %s WHERE col_1 = %L', table_name, table_name, col_first)
+    SET iter TO 1;
+
+    FOR col IN EXECUTE FORMAT('SELECT UNNEST(string_to_array(TRIM(%s::text, ''()''), '','')) FROM preprocess.%s WHERE col_1 = %L', table_name, table_name, col_first)
     LOOP
-        EXECUTE FORMAT("ALTER TABLE %I RENAME COLUMN col_%s TO %s", table_name, iter, col);
+        EXECUTE FORMAT('ALTER TABLE preprocess.%I RENAME COLUMN col_%s TO %s', table_name, iter, col);
         iter := iter + 1; -- increment counter
     END LOOP;
     -- delete the columns row
-    EXECUTE FORMAT('DELETE FROM %I WHERE %s = %L', table_name, col_first, col_first);
+    EXECUTE FORMAT('DELETE FROM preprocess.%I WHERE %s = %L', table_name, col_first, col_first);
 
 END;
-$$ LANGUAGE PLPGSQL;
+$$ SECURITY DEFINER; -- to bypass superuser permissions 
 
-CREATE OR REPLACE FUNCTION preprocess.etl_setup(
-    csv_file_path TEXT, 
-    number_of_columns INTEGER, 
-    array_of_files TEXT[]
+CREATE OR REPLACE PROCEDURE preprocess.etl_setup(
+    no_tables INTEGER,
+    number_of_columns INTEGER ARRAY, 
+    array_of_files TEXT ARRAY,
+    table_name_less_date TEXT ARRAY,
+    array_of_csv TEXT ARRAY
 )
-RETURNS VOID AS
-$$
+LANGUAGE PLPGSQL
+AS $$
 DECLARE
-file_name_ VARCHAR(20);
-no_of_files INTEGER; -- getting the total length of records in a file
-iter INTEGER;
+file_name_ VARCHAR(30);
+full_table_name_ VARCHAR(30);
+csv_file_ VARCHAR(200);
+number_ INTEGER := 0;
+record_count INTEGER := 0;
 BEGIN   
-    INSERT INTO no_of_files
-    SELECT CARDINALITY(id) FROM array_of_files;
 
-    CREATE TEMP TABLE tmp(csv_file_name VARCHAR(20));
+    CREATE TEMP TABLE IF NOT EXISTS tmp(
+        csv_file_name VARCHAR(30),
+        full_table_name VARCHAR(30),
+        csv_file_path VARCHAR(200)
+    );
     
     -- inserting filenames into tmp table from array retrieved from python code
-    FOR iter IN 1..no_of_files
+    FOR i IN 0..no_tables
     LOOP
         INSERT INTO tmp (csv_file_name) 
-        SELECT array_of_files[i];
+        VALUES (array_of_files[i]);
+        INSERT INTO tmp(full_table_name)
+        VALUES (table_name_less_date[i]);
+        INSERT INTO tmp(csv_file_path)
+        VALUES (array_of_csv[i]);
     END LOOP;
 
-    -- for as long as there is a filename within the temporary table loop through
-    WHILE(SELECT COUNT(*) FROM tmp WHERE csv_file_name IS NOT NULL) > 0
+    -- cte to generate counter variable for total amount of tables to create
+    WITH loop_count AS (
+        SELECT COUNT(*) 
+        FROM tmp 
+        WHERE csv_file_name IS NOT NULL
+    )
+    SELECT * FROM loop_count INTO number_;
+
+    FOR i IN 0..number_
     LOOP
-        SELECT *
-        FROM tmp
-        WHERE file_name_ = csv_file_name
-        ORDER BY csv_file_name ASC
-        LIMIT 1;
+        WITH file_names_ AS(
+            SELECT csv_file_name
+            FROM tmp
+            ORDER BY csv_file_name ASC
+            LIMIT 1
+        )
+        SELECT * FROM file_names_ INTO file_name_; -- variable for file name
+        
+        WITH table_names_ AS(
+            SELECT full_table_name
+            FROM tmp 
+            ORDER BY full_table_name ASC
+            LIMIT 1 
+        )
+        SELECT * FROM table_names_ INTO full_table_name_; -- variable for file path for table
 
-         -- loading staging tables with data from csv files
-        EXECUTE FORMAT('CALL preprocess.copy_expert(%I, %I, %I)', file_name_, csv_file_path, number_of_columns);
+        WITH csv_files AS(
+            SELECT csv_file_path
+            FROM tmp
+            ORDER BY csv_file_path ASC
+            LIMIT 1
+        )
+        SELECT * FROM csv_files INTO csv_file_; -- variable for csv file directory
+
+        SELECT number_of_columns[i] INTO record_count;
+
+        -- loading staging tables with data from csv files
+        EXECUTE FORMAT('CALL preprocess.copy_expert(''%s'', ''%s'', %I, ''%s'')', file_name_, csv_file_, record_count, full_table_name_);
+        -- removing data from temp table
         DELETE FROM tmp WHERE csv_file_name = file_name_; -- delete the filename from the table 
+        DELETE FROM tmp WHERE csv_file_path = csv_file_;
+        DELETE FROM tmp WHERE full_table_name = full_table_name_;
     END LOOP;
-
-    -- create tables dynamically, based on input of table names variable
-    -- set loose records with no data typing just to get data into tables 
-
-     -- use the file directory where the csv files are stored 
-     -- loop through directory for each file and create table 
-     -- use shell command to do so
-
-     --THEN STAGE 1  or separate stored procedure 
-     -- CREATE 15 columns within table and then change the column names to be the first row of records in csv
-     -- separate these values by ',' to get the text content only 
-     --
-     --stage 2 or call a separate stored procedure for this 
-     -- copy from file directory to the database table directly 
-
 END;
-$$ LANGUAGE plpgsql;
+$$ SECURITY DEFINER;
 
-REVOKE ALL ON FUNCTION preprocess.etl_setup(csv_file_path TEXT, number_of_columns INTEGER, array_of_files TEXT[]) FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to etl_setup function for all users
-GRANT EXECUTE ON FUNCTION preprocess.etl_setup(csv_file_path TEXT, number_of_columns INTEGER, array_of_files TEXT[]) TO dbdev;
+REVOKE ALL ON PROCEDURE preprocess.etl_setup(no_tables INTEGER, number_of_columns INTEGER ARRAY, array_of_files TEXT ARRAY, table_name_less_date TEXT ARRAY, array_of_csv TEXT ARRAY) FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to etl_setup function for all users
+GRANT EXECUTE ON PROCEDURE preprocess.etl_setup(no_tables INTEGER, number_of_columns INTEGER ARRAY, array_of_files TEXT ARRAY, table_name_less_date TEXT ARRAY, array_of_csv TEXT ARRAY) TO dbdev, postgres;
 
-REVOKE ALL ON FUNCTION preprocess.copy_expert(table_name TEXT, csv_path TEXT, column_count INTEGER) FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to copy_expert function for all users
-GRANT EXECUTE ON FUNCTION preprocess.copy_expert(table_name TEXT, csv_path TEXT, column_count INTEGER) TO dbdev;
+REVOKE ALL ON PROCEDURE preprocess.copy_expert(table_name TEXT, csv_path VARCHAR(110), column_count INTEGER, table_name_less_date TEXT) FROM dwdev, dbdev, airflow, postgres, pgbouncer; -- remove access to copy_expert function for all users
+GRANT EXECUTE ON PROCEDURE preprocess.copy_expert(table_name TEXT, csv_path VARCHAR(110), column_count INTEGER, table_name_less_date TEXT) TO dbdev, postgres;
