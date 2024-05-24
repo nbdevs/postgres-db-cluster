@@ -35,7 +35,7 @@ BEGIN
         EXECUTE FORMAT('ALTER TABLE preprocess.%I RENAME COLUMN col_%s TO %s;', table_name, iter, col);
         iter := iter + 1; -- increment counter
     END LOOP;
-    RAISE NOTICE 'DELETING COLUMN FROM TABLE'
+    RAISE NOTICE 'DELETING COLUMN FROM TABLE';
     -- delete the columns row
     EXECUTE FORMAT('DELETE FROM preprocess.%I WHERE %s = %L;', table_name, col_first, col_first);
 
