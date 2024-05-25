@@ -26,7 +26,7 @@ BEGIN
    EXECUTE FORMAT('COPY preprocess.%I FROM ''%s'' WITH (FORMAT CSV, DELIMITER '','', HEADER);', table_name, csv_path);
 
 
-   EXECUTE FORMAT("SELECT col_1 FROM %I LIMIT 1 INTO col_first;", table_name);
+   EXECUTE FORMAT('SELECT col_1 FROM %I LIMIT 1 INTO col_first;', table_name);
 
     RAISE NOTICE 'RENAMING COLUMN NAMES WITHIN TABLE';
     SET iter TO 1;
