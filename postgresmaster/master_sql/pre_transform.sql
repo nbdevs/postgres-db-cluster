@@ -2,7 +2,7 @@ CREATE OR REPLACE PROCEDURE preprocess.copy_expert(
     table_name TEXT,
     csv_path VARCHAR(200),
     column_count INTEGER,
-    table_name_less_date TEXT
+    table_name_less_date VARCHAR(30)
 )
 LANGUAGE PLPGSQL
 AS $$
@@ -13,20 +13,19 @@ iter INTEGER;
 BEGIN
     RAISE NOTICE 'CREATING LANDING TABLE';
     --stage 1 
-    EXECUTE FORMAT('CREATE TABLE IF NOT EXISTS preprocess.%I();', table_name); -- creating landing table
+    EXECUTE FORMAT('CREATE TABLE IF NOT EXISTS preprocess.%s();', table_name); -- creating landing table
     
     RAISE NOTICE 'ADDING COLUMNS TO LANDING TABLE';
     FOR iter IN 1..column_count
     LOOP -- loop through and populate table based on 
-        EXECUTE FORMAT('ALTER TABLE preprocess.%I ADD COLUMN col_%s TEXT;', table_name, iter);
+        EXECUTE FORMAT('ALTER TABLE preprocess.%s ADD COLUMN col_%s TEXT;', table_name, iter);
     END LOOP;
 
    RAISE NOTICE 'COPYING CSV DATA INTO TABLE';
     -- stage 2
-   EXECUTE FORMAT('COPY preprocess.%I FROM ''%s'' WITH (FORMAT CSV, DELIMITER '','', HEADER);', table_name, csv_path);
+   EXECUTE FORMAT('COPY preprocess.%s FROM ''%s'' WITH (FORMAT CSV, DELIMITER '','', HEADER);', table_name, csv_path);
 
-
-   EXECUTE FORMAT('SELECT col_1 FROM %I LIMIT 1 INTO col_first;', table_name);
+   EXECUTE FORMAT('SELECT col_1 FROM preprocess.%s FETCH FIRST 1 ROWS ONLY INTO %s;', table_name, col_first);
 
     RAISE NOTICE 'RENAMING COLUMN NAMES WITHIN TABLE';
     SET iter TO 1;
@@ -71,12 +70,8 @@ BEGIN
     -- inserting filenames into tmp table from array retrieved from python code
     FOR i IN 1..no_tables -- ARRAYS START FROM 1 
     LOOP
-        INSERT INTO tmp (csv_file_name) 
-        VALUES (array_of_files[i]);
-        INSERT INTO tmp(full_table_name)
-        VALUES (table_name_less_date[i]);
-        INSERT INTO tmp(csv_file_path)
-        VALUES (array_of_csv[i]);
+        INSERT INTO tmp (csv_file_name, full_table_name, csv_file_path) 
+        VALUES (array_of_files[i], table_name_less_date[i], array_of_csv[i]);
     END LOOP;
 
     FOR j IN 1..no_tables
@@ -86,7 +81,6 @@ BEGIN
         WITH file_names_ AS(
             SELECT csv_file_name
             FROM tmp
-            ORDER BY csv_file_name ASC
             LIMIT 1
         )
         SELECT * FROM file_names_ INTO file_name_; -- variable for file name
@@ -94,15 +88,13 @@ BEGIN
         WITH table_names_ AS(
             SELECT full_table_name
             FROM tmp 
-            ORDER BY full_table_name ASC
-            LIMIT 1 
+            LIMIT 1
         )
         SELECT * FROM table_names_ INTO full_table_name_; -- variable for file path for table
 
         WITH csv_files AS(
             SELECT csv_file_path
             FROM tmp
-            ORDER BY csv_file_path ASC
             LIMIT 1
         )
         SELECT * FROM csv_files INTO csv_file_; -- variable for csv file directory
@@ -117,8 +109,8 @@ BEGIN
         EXECUTE FORMAT('CALL preprocess.copy_expert(''%s'', ''%s'', ''%s'', ''%s'')', file_name_, csv_file_, record_count, full_table_name_);
         -- removing data from temp table
         DELETE FROM tmp WHERE csv_file_name = file_name_; -- delete the filename from the table 
-        DELETE FROM tmp WHERE csv_file_path = csv_file_;
-        DELETE FROM tmp WHERE full_table_name = full_table_name_;
+        DELETE FROM tmp WHERE csv_file_path = csv_file_; -- delete the csv file from the table 
+        DELETE FROM tmp WHERE full_table_name = full_table_name_; -- delete the table name including date from the table 
     END LOOP;
 END;
 $$ SECURITY DEFINER;
@@ -126,5 +118,5 @@ $$ SECURITY DEFINER;
 REVOKE ALL ON PROCEDURE preprocess.etl_setup(no_tables INTEGER, number_of_columns INTEGER ARRAY, array_of_files TEXT ARRAY, table_name_less_date TEXT ARRAY, array_of_csv TEXT ARRAY) FROM dwdev, dba, airflow, postgres, pgbouncer; -- remove access to etl_setup function for all users
 GRANT EXECUTE ON PROCEDURE preprocess.etl_setup(no_tables INTEGER, number_of_columns INTEGER ARRAY, array_of_files TEXT ARRAY, table_name_less_date TEXT ARRAY, array_of_csv TEXT ARRAY) TO dbdev, postgres;
 
-REVOKE ALL ON PROCEDURE preprocess.copy_expert(table_name TEXT, csv_path VARCHAR(110), column_count INTEGER, table_name_less_date TEXT) FROM dwdev, dbdev, airflow, postgres, pgbouncer; -- remove access to copy_expert function for all users
-GRANT EXECUTE ON PROCEDURE preprocess.copy_expert(table_name TEXT, csv_path VARCHAR(110), column_count INTEGER, table_name_less_date TEXT) TO dbdev, postgres;
+REVOKE ALL ON PROCEDURE preprocess.copy_expert(table_name TEXT, csv_path VARCHAR(110), column_count INTEGER, table_name_less_date VARCHAR(30)) FROM dwdev, dbdev, airflow, postgres, pgbouncer; -- remove access to copy_expert function for all users
+GRANT EXECUTE ON PROCEDURE preprocess.copy_expert(table_name TEXT, csv_path VARCHAR(110), column_count INTEGER, table_name_less_date VARCHAR(30)) TO dbdev, postgres;
