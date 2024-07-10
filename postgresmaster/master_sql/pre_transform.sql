@@ -9,34 +9,34 @@ AS $$
 DECLARE
 col TEXT;
 col_first TEXT;
-iter INTEGER;
+iter INTEGER := 1;
 BEGIN
     RAISE NOTICE 'CREATING LANDING TABLE';
     --stage 1 
     EXECUTE FORMAT('CREATE TABLE IF NOT EXISTS preprocess.%s();', table_name); -- creating landing table
     
     RAISE NOTICE 'ADDING COLUMNS TO LANDING TABLE';
-    FOR iter IN 1..column_count
+    FOR i IN 1..column_count
     LOOP -- loop through and populate table based on 
-        EXECUTE FORMAT('ALTER TABLE preprocess.%s ADD COLUMN col_%s TEXT;', table_name, iter);
+        EXECUTE FORMAT('ALTER TABLE preprocess.%s ADD COLUMN col_%s TEXT;', table_name, i);
     END LOOP;
 
    RAISE NOTICE 'COPYING CSV DATA INTO TABLE';
     -- stage 2
-   EXECUTE FORMAT('COPY preprocess.%s FROM ''%s'' WITH (FORMAT CSV, DELIMITER '','', HEADER);', table_name, csv_path);
+    EXECUTE FORMAT('COPY preprocess.%s FROM ''%s'' WITH (FORMAT CSV, DELIMITER '','');', table_name, csv_path);
 
-   EXECUTE FORMAT('SELECT col_1 FROM preprocess.%s FETCH FIRST 1 ROWS ONLY INTO %s;', table_name, col_first);
+    EXECUTE FORMAT('SELECT col_1 FROM preprocess.%s LIMIT 1;', table_name) INTO col_first; --first row containing column names
 
     RAISE NOTICE 'RENAMING COLUMN NAMES WITHIN TABLE';
-    SET iter TO 1;
-    FOR col IN EXECUTE FORMAT('SELECT UNNEST(string_to_array(TRIM(%s::text, ''()''), '','')) FROM preprocess.%s WHERE col_1 = %L;', table_name, table_name, col_first)
+  --  SET iter TO 1;
+    FOR col IN EXECUTE FORMAT('SELECT UNNEST(string_to_array(TRIM(%s::text, ''()''), '','')) FROM preprocess.%s WHERE col_1 = ''%s'';', table_name, table_name, col_first) -- update column names to the correct names in col_first 
     LOOP
-        EXECUTE FORMAT('ALTER TABLE preprocess.%I RENAME COLUMN col_%s TO %s;', table_name, iter, col);
+        EXECUTE FORMAT('ALTER TABLE preprocess.%s RENAME COLUMN col_%s TO %s;', table_name, iter, col);
         iter := iter + 1; -- increment counter
     END LOOP;
     RAISE NOTICE 'DELETING COLUMN FROM TABLE';
     -- delete the columns row
-    EXECUTE FORMAT('DELETE FROM preprocess.%I WHERE %s = %L;', table_name, col_first, col_first);
+    EXECUTE FORMAT('DELETE FROM preprocess.%s WHERE %s = %L;', table_name, col_first, col_first);
 
 END;
 $$ SECURITY DEFINER; -- to bypass superuser permissions 
@@ -59,7 +59,7 @@ record_count INTEGER;
 BEGIN   
 
     RAISE NOTICE 'CREATING TEMP TABLE';
-
+    -- creating temporary table to store files, filenames and csv file locations
     CREATE TEMP TABLE IF NOT EXISTS tmp(
         csv_file_name VARCHAR(30),
         full_table_name VARCHAR(30),
